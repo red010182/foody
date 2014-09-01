@@ -84,13 +84,7 @@ def createCSV(file_name=None):
 
 if __name__ == '__main__':
     # createCSV('originLocations.csv')
-    config = ConfigParser.ConfigParser()
-    config.readfp(open(r'db_config.txt'))
-    db = MySQLdb.connect(host=config.get('DB','host'),
-                     user=config.get('DB','user'),
-                      passwd=config.get('DB','password'),
-                      db=config.get('DB','db'),
-                      port=int(config.get('DB','port')))
+    
     # records = loadSQLite("delicacy.db")
     # upateDatabaseWithSpawnConn(records[0:1000],100)
 

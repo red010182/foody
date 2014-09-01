@@ -41,12 +41,10 @@ def openDB():
                       port=int(config.get('DB','port')))
     return db
 
-if __name__ == '__main__':
+def updateWithOffset(offset=None):
     api = ApiObject()
 
     newLocations = list()
-    errorLocations = list()
-    offset = int(sys.argv[1])
 
     db = openDB()
     cur = db.cursor()
@@ -84,43 +82,49 @@ if __name__ == '__main__':
             
         except:
             print 'API error'
-
-
     db.close()
 
-    # j=0
-    # for line in open('location.txt','r'):
-    #     j+=1
-    #     # 1,121.7817407,25.04357,台北市中正區八德路一段82巷9弄19號
-    #     ary = line.strip().split(',')
-    #     id_ = ary[0]
-    #     address = ary[3]
-    #     if int(id_) <= offset:
-    #         print 'skip id: ' + id_
-    #         continue
-    #     try:
-    #         time.sleep(0.1)
-    #         r = api.reqAddress(address)
-    #         if r.json()['status'] == 'OVER_QUERY_LIMIT':
-    #             print 'OVER_QUERY_LIMIT => program terminate.'
-    #             break
-    #         if r.json()['status'] != 'OK':
-    #             errorLocations.append(id_)
-    #             raise FooException(line)
-    #         location = r.json()['results'][0]['geometry']['location']
-    #         newLocation = "%s,%f,%f,%s" %(id_,location['lng'], location['lat'],address)
-    #         print newLocation
-    #         newLocations.append(newLocation)
-    #         if j % 500 == 0:
-    #             with open('newLocation.pickle', 'w') as f:
-    #                 pickle.dump(newLocations, f)
-    #             with open('errorLocatioin.pickle','w') as f:
-       #              pickle.dump(errorLocations, f)
-    #         # f.write(newLocation+'\n')
-    #     except FooException as e:
-    #         print 'error'
+def updateByCheckingDatabaseColumns():
+    api = ApiObject()
+
+    newLocations = list()
+
+    db = openDB()
+    cur = db.cursor()
+    cur.execute('select * from delicacy where lon < 1 or lat < 1')
+    records = cur.fetchall()
+    for record in records:
+        try:
+            time.sleep(0.1)
+            id_ = record[0]
+            address = record[3]
+            r = api.reqAddress(address)
+            if r.json()['status'] == 'OVER_QUERY_LIMIT':
+                print 'OVER_QUERY_LIMIT => program terminate.'
+                break
+            if r.json()['status'] != 'OK':
+                errorLocations.append(id_)
+                raise FooException(line)
+            location = r.json()['results'][0]['geometry']['location']
+            newLon = location['lng']
+            newLat = location['lat']
             
-    # with open('newLocation.pickle', 'w') as f:
-    #         pickle.dump(newLocations, f)
-    # with open('errorLocatioin.pickle','w') as f:
-    #         pickle.dump(errorLocations, f)
+            # print "%f %f " %(newLon,newLat)
+
+            sql = "UPDATE delicacy SET lon='%f',lat='%f' WHERE id=%i" % (newLon,newLat,id_)
+            print sql
+            try:
+                cur.execute(sql)
+                if i%100 == 0:
+                    db.commit()
+            except:
+                print 'DB error'
+                db.rollback()
+            
+        except:
+            print 'API error'
+    db.close()
+
+if __name__ == '__main__':
+    # updateWithOffset(offset = int(sys.argv[1]))
+    updateByCheckingDatabaseColumns()
