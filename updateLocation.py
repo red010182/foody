@@ -101,7 +101,7 @@ def updateByCheckingDatabaseColumns():
             r = api.reqAddress(address)
             if r.json()['status'] == 'OVER_QUERY_LIMIT':
                 print 'OVER_QUERY_LIMIT => program terminate.'
-                break
+                raise
             if r.json()['status'] != 'OK':
                 errorLocations.append(id_)
                 raise FooException(line)
@@ -123,6 +123,7 @@ def updateByCheckingDatabaseColumns():
             
         except:
             print 'API error'
+            break
     db.close()
 
 if __name__ == '__main__':
