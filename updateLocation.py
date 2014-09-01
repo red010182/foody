@@ -32,6 +32,8 @@ def loadSQLite(file_name=None):
     return records
 
 def openDB():
+    config = ConfigParser.ConfigParser()
+    config.readfp(open(r'db_config.txt'))
     db = MySQLdb.connect(host=config.get('DB','host'),
                      user=config.get('DB','user'),
                       passwd=config.get('DB','password'),
@@ -45,10 +47,6 @@ if __name__ == '__main__':
     newLocations = list()
     errorLocations = list()
     offset = int(sys.argv[1])
-
-    config = ConfigParser.ConfigParser()
-    config.readfp(open(r'db_config.txt'))
-    
 
     db = openDB()
     cur = db.cursor()
