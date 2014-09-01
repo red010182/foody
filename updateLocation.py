@@ -116,15 +116,16 @@ def updateByCheckingDatabaseColumns():
             print sql
             try:
                 cur.execute(sql)
-                if i%100 == 0:
-                    db.commit()
+                # if i%100 == 0:
+                db.commit()
             except:
                 print 'DB error'
                 db.rollback()
+                break
             
         except:
             print 'API error'
-            break
+            # break
     db.close()
 
 if __name__ == '__main__':
