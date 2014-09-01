@@ -8,7 +8,7 @@ import sys
 import ConfigParser
 import sqlite3
 import MySQLdb
-
+import re
 
 class ApiObject(object):
     """docstring for ApiObject"""
@@ -97,7 +97,8 @@ def updateByCheckingDatabaseColumns():
         try:
             time.sleep(0.1)
             id_ = record[0]
-            address = record[3]
+            address = address = re.sub(r"\(.*\)","",record[3])
+            # print address
             r = api.reqAddress(address)
             if r.json()['status'] == 'OVER_QUERY_LIMIT':
                 print 'OVER_QUERY_LIMIT => program terminate.'
